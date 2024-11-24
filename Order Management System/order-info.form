@@ -1,0 +1,73 @@
+{
+  "components": [
+    {
+      "computeOn": "change",
+      "type": "expression",
+      "layout": {
+        "row": "Row_0l6suyp",
+        "columns": null
+      },
+      "id": "Field_1olp86j",
+      "key": "orderID",
+      "expression": "=uuid()",
+      "properties": {}
+    },
+    {
+      "text": "#### Order ID :\n## {{orderID}}",
+      "type": "text",
+      "layout": {
+        "row": "Row_0133e7m",
+        "columns": null
+      },
+      "id": "Field_0uone6c"
+    },
+    {
+      "label": "Product Name",
+      "type": "textfield",
+      "layout": {
+        "row": "Row_0zarbwy",
+        "columns": null
+      },
+      "id": "Field_0e2cz9q",
+      "key": "productName",
+      "defaultValue": "Toast",
+      "validate": {
+        "required": true
+      }
+    },
+    {
+      "label": "Product Amount",
+      "type": "textfield",
+      "layout": {
+        "row": "Row_0mragb2",
+        "columns": null
+      },
+      "id": "Field_02w1dv3",
+      "key": "productAmount",
+      "defaultValue": "1",
+      "validate": {
+        "required": true
+      }
+    },
+    {
+      "computeOn": "change",
+      "type": "expression",
+      "layout": {
+        "row": "Row_1luoxgn",
+        "columns": null
+      },
+      "id": "Field_020huiz",
+      "key": "isOrderValid",
+      "expression": "=orderID!=NULL and\nproductName!=NULL and\nproductAmount!=NULL"
+    }
+  ],
+  "type": "default",
+  "id": "order-info",
+  "executionPlatform": "Camunda Cloud",
+  "executionPlatformVersion": "8.6.0",
+  "exporter": {
+    "name": "Camunda Modeler",
+    "version": "5.29.0"
+  },
+  "schemaVersion": 17
+}
