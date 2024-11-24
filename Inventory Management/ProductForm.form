@@ -1,0 +1,80 @@
+{
+  "components": [
+    {
+      "label": "Item ID",
+      "type": "textfield",
+      "layout": {
+        "row": "Row_06vmvuz",
+        "columns": null
+      },
+      "id": "Field_0bdco40",
+      "key": "itemId",
+      "defaultValue": "item001",
+      "validate": {
+        "required": true
+      }
+    },
+    {
+      "label": "Item Name",
+      "type": "textfield",
+      "layout": {
+        "row": "Row_0lb3ljt",
+        "columns": null
+      },
+      "id": "Field_1c5k7ua",
+      "key": "itemName",
+      "defaultValue": "NV",
+      "validate": {
+        "required": true
+      }
+    },
+    {
+      "label": "Quantity",
+      "type": "number",
+      "layout": {
+        "row": "Row_0phoshx",
+        "columns": null
+      },
+      "id": "Field_1m8umo8",
+      "key": "quantity",
+      "defaultValue": 0,
+      "validate": {
+        "required": true
+      }
+    },
+    {
+      "subtype": "date",
+      "dateLabel": "Expiry Date",
+      "type": "datetime",
+      "layout": {
+        "row": "Row_0fyc71u",
+        "columns": null
+      },
+      "id": "Field_1seebtd",
+      "key": "expiryDate",
+      "validate": {
+        "required": true
+      }
+    },
+    {
+      "label": "Lossing Number",
+      "type": "number",
+      "layout": {
+        "row": "Row_0eg4m3d",
+        "columns": null
+      },
+      "id": "Field_01qb1mr",
+      "key": "lossingNumber",
+      "defaultValue": 0
+    }
+  ],
+  "type": "default",
+  "id": "inventoryCount",
+  "executionPlatform": "Camunda Cloud",
+  "executionPlatformVersion": "8.6.0",
+  "exporter": {
+    "name": "Camunda Modeler",
+    "version": "5.29.0"
+  },
+  "schemaVersion": 17
+}
