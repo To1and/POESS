@@ -1,0 +1,63 @@
+{
+  "executionPlatform": "Camunda Cloud",
+  "executionPlatformVersion": "8.6.0",
+  "exporter": {
+    "name": "Camunda Web Modeler",
+    "version": "fc945f5"
+  },
+  "schemaVersion": 17,
+  "id": "order-info",
+  "components": [
+    {
+      "label": "Product Name",
+      "values": [
+        {
+          "label": "Apple",
+          "value": "Apple"
+        },
+        {
+          "label": "Banana",
+          "value": "Banana"
+        },
+        {
+          "label": "Cake",
+          "value": "Cake"
+        },
+        {
+          "label": "Durian",
+          "value": "Durian"
+        },
+        {
+          "label": "Egg",
+          "value": "Egg"
+        }
+      ],
+      "type": "select",
+      "layout": {
+        "row": "Row_0uknik5",
+        "columns": null
+      },
+      "id": "Field_0i0i4u6",
+      "key": "productName",
+      "defaultValue": "Cake",
+      "searchable": false
+    },
+    {
+      "label": "Product Amount",
+      "type": "number",
+      "layout": {
+        "row": "Row_0mlq68g",
+        "columns": null
+      },
+      "id": "Field_03e4sfg",
+      "key": "productAmount",
+      "decimalDigits": 0,
+      "increment": "1",
+      "defaultValue": 0,
+      "validate": {
+        "min": 0
+      }
+    }
+  ],
+  "type": "default"
+}

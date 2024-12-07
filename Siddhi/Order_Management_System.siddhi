@@ -1,0 +1,79 @@
+@App:name('Order Management System')
+
+@App:description('A Stream that process all order behaviors.')
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------RECEIVER-------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------------------------------
+-- Verify Order and Check Stock Info Receiver
+@sink(type = 'log')
+@source(
+type = 'http',
+receiver.url = "http://localhost:8006/verifyOrder",
+basic.auth.enabled='false',
+@map(type = 'json')
+)
+define stream RecOrderVerificationStream (orderId string, orderTimeStamp string, productName string, productAmount int);
+
+-------------------------------------------------------------------------------------------------------------------------------------------
+-- Payment Request Receiver
+@sink(type = 'log')
+@source(
+type = 'http',
+receiver.url = "http://localhost:8006/payment",
+@map(type = 'json')
+)
+define stream RecPaymentStream (fullName string, phoneNumber string, eatIn bool, address string, payAtStore bool, cardNumber string, cardHolderName string, validDate string, cvv string, isPaymentSuccessful bool);
+
+-------------------------------------------------------------------------------------------------------------------------------------------
+-- Merchant Notification Receiver
+@source(type = 'http', receiver.url = "http://localhost:8006/merchant",
+@map(type = 'json'))
+@sink(type = 'log')
+define stream RecMerchantStream (productName string);
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------PUBLISHER------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------------------------------------------------------------
+-- Order Information Publisher
+@sink(type = 'log')
+@sink(
+type = 'http',
+publisher.url = "https://lhr-1.zeebe.camunda.io/41e4a26e-b9e2-4b1a-99a9-e65f1f09efd9/v2/messages/correlation",
+method = "POST",
+headers = "'Host: lhr-1.zeebe.camunda.io','Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IlFVVXdPVFpDUTBVM01qZEVRME0wTkRFelJrUkJORFk0T0RZeE1FRTBSa1pFUlVWRVF6bERNZyJ9.eyJodHRwczovL2NhbXVuZGEuY29tL2NsdXN0ZXJJZCI6IjQxZTRhMjZlLWI5ZTItNGIxYS05OWE5LWU2NWYxZjA5ZWZkOSIsImh0dHBzOi8vY2FtdW5kYS5jb20vb3JnSWQiOiJhNzQyNjg5Zi0xNGI5LTQxOGYtYjhkYS00OWViZTQxNjUxZWMiLCJodHRwczovL2NhbXVuZGEuY29tL2NsaWVudElkIjoiOG9SUFR3dnRvMllkQllWQ1dHbGM3NFJwRkpseWFLR3ciLCJpc3MiOiJodHRwczovL3dlYmxvZ2luLmNsb3VkLmNhbXVuZGEuaW8vIiwic3ViIjoibXdvOTB0MnIzMTYwN3ozNkJOSDY5dFdGS0JYNTVqMVdAY2xpZW50cyIsImF1ZCI6InplZWJlLmNhbXVuZGEuaW8iLCJpYXQiOjE3MzI4MzAxMzcsImV4cCI6MTczMjkxNjUzNywic2NvcGUiOiI0MWU0YTI2ZS1iOWUyLTRiMWEtOTlhOS1lNjVmMWYwOWVmZDkiLCJndHkiOiJjbGllbnQtY3JlZGVudGlhbHMiLCJhenAiOiJtd285MHQycjMxNjA3ejM2Qk5INjl0V0ZLQlg1NWoxVyJ9.mqCOzJx64RfFKK4SiwKsBLn72PH-G33ieIVisCFLlIqTPCaaY382QVx3OOAE97SGgZqsdbUGLVqkPszbTQBxTKIJl2d-luDm9em9mHMbXtccTfNxWaSVrq2A5ZHdJ6IuapcSNpMba3JGy6nzXmS2Subl-d55KBXJ4bO5_7QMn0ioEmhyxPDoKd0YD05Nj73bqCcJ8sJWh8JF2KsmdbHCgsVXg2ZYqvE_tiySYp4a-79IqUfPYthfPOC1zQ5xWDQAeVS_KlPhHgofz9B-lxoGTxPvGF10Djj7jTMK0GSS5rzZ2CUEdJyMitondZc9mbkTlkhv8wVLV7fp0I8COqqCkQ'",
+ssl.verification.disabled = "true",
+@map(type = 'json',
+@payload("""
+{
+"name":"{{name}}",
+"correlationKey":"{{correlationKey}}",
+"variables":{
+"isStockAvailable":"{{isStockAvailable}}"
+}
+}
+""")
+)
+)
+define stream PublisherStream (name string, correlationKey string, isStockAvailable bool);
+
+from RecOrderVerificationStream[productAmount == 0]#window.delay(10 sec)
+select "Invalid Order" as name, "msgInvalidOrder" as correlationKey, true as isStockAvailable
+insert into PublisherStream;
+
+from RecOrderVerificationStream[productAmount > 0 and productAmount <= 10 ]#window.delay(10 sec)
+select "Valid Order" as name, "msgValidOrder" as correlationKey, true as isStockAvailable
+insert into PublisherStream;
+
+from RecOrderVerificationStream[productAmount > 10]#window.delay(10 sec)
+select "Valid Order" as name, "msgValidOrder" as correlationKey, false as isStockAvailable
+insert into PublisherStream;
+
+from RecPaymentStream[isPaymentSuccessful == true]#window.delay(10 sec)
+select "Payment Succeed" as name, "msgPaymentSucceed" as correlationKey, true as isStockAvailable
+insert into PublisherStream;
+
+from RecPaymentStream[isPaymentSuccessful == false]#window.delay(10 sec)
+select "Payment Failed" as name, "msgPaymentFailed" as correlationKey, true as isStockAvailable
+insert into PublisherStream;

@@ -1,0 +1,144 @@
+{
+  "executionPlatform": "Camunda Cloud",
+  "executionPlatformVersion": "8.6.0",
+  "exporter": {
+    "name": "Camunda Web Modeler",
+    "version": "fc945f5"
+  },
+  "schemaVersion": 17,
+  "id": "payment-info",
+  "components": [
+    {
+      "label": "Full Name",
+      "type": "textfield",
+      "layout": {
+        "row": "Row_0fgb7fe",
+        "columns": null
+      },
+      "id": "Field_02lq9wo",
+      "key": "fullName",
+      "defaultValue": "Toland"
+    },
+    {
+      "label": "Phone Number",
+      "type": "textfield",
+      "layout": {
+        "row": "Row_15dncoa",
+        "columns": null
+      },
+      "id": "Field_1pg2ud2",
+      "key": "phoneNumber",
+      "appearance": {
+        "prefixAdorner": "+45"
+      },
+      "defaultValue": "50322635"
+    },
+    {
+      "label": "I prefer eat in!",
+      "type": "checkbox",
+      "layout": {
+        "row": "Row_1v7toy4",
+        "columns": null
+      },
+      "id": "Field_1cct97x",
+      "key": "eatIn"
+    },
+    {
+      "label": "Address",
+      "type": "textfield",
+      "layout": {
+        "row": "Row_17ta70j",
+        "columns": null
+      },
+      "id": "Field_1pxldwy",
+      "key": "address",
+      "disabled": false,
+      "conditional": {
+        "hide": "=eatIn=true"
+      },
+      "defaultValue": "Lundtoftevej 162 C, Room 217"
+    },
+    {
+      "label": "I prefer pay at store",
+      "type": "checkbox",
+      "layout": {
+        "row": "Row_1rdd64u",
+        "columns": null
+      },
+      "id": "Field_0weu8tv",
+      "key": "payAtStore"
+    },
+    {
+      "label": "Card",
+      "components": [
+        {
+          "label": "Card Number",
+          "type": "textfield",
+          "layout": {
+            "row": "Row_1rj6b11",
+            "columns": null
+          },
+          "id": "Field_0ffqltx",
+          "key": "cardNumber",
+          "defaultValue": "1234 1234 1234 1234"
+        },
+        {
+          "label": "Card Holder Name",
+          "type": "textfield",
+          "layout": {
+            "row": "Row_0ybjun0",
+            "columns": null
+          },
+          "id": "Field_1q1wgf5",
+          "key": "cardHolderName",
+          "defaultValue": "Yue Zhou"
+        },
+        {
+          "label": "Valid Date",
+          "type": "textfield",
+          "layout": {
+            "row": "Row_16kgc2a",
+            "columns": null
+          },
+          "id": "Field_1dud3yz",
+          "key": "validDate",
+          "defaultValue": "03/24"
+        },
+        {
+          "label": "CVV",
+          "type": "textfield",
+          "layout": {
+            "row": "Row_16kgc2a",
+            "columns": null
+          },
+          "id": "Field_0xo2k5p",
+          "key": "cvv",
+          "defaultValue": "169"
+        }
+      ],
+      "showOutline": true,
+      "type": "group",
+      "layout": {
+        "row": "Row_1y5q7n1",
+        "columns": null
+      },
+      "id": "Field_0v94zy7",
+      "conditional": {
+        "hide": "=payAtStore=true"
+      },
+      "path": "cardInfo"
+    },
+    {
+      "label": "Is this a successful payment?",
+      "type": "checkbox",
+      "layout": {
+        "row": "Row_0z494lr",
+        "columns": null
+      },
+      "id": "Field_0tjw8u6",
+      "key": "isPaymentSuccessful",
+      "defaultValue": true
+    }
+  ],
+  "type": "default"
+}

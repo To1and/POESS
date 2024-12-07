@@ -1,0 +1,123 @@
+@App:name('InventoryApp')
+@App:description('Monitor Invenory')
+
+define stream SalesStream (itemId string, itemName string, sales int, saleDate long);
+
+@source(type = 'http',
+	receiver.url = "http://localhost:8006/input/inventory",
+	@map(type = 'json'))
+@sink(type = 'log')
+define stream InventoryStream (itemId string, itemName string, quantity int, expiryDate string, processId string);
+
+@sink(type = 'http', 
+	publisher.url = 'https://lhr-1.zeebe.camunda.io/41e4a26e-b9e2-4b1a-99a9-e65f1f09efd9/v2/messages/correlation',
+	headers = "'Host:lhr-1.zeebe.camunda.io','Content-Type: application/json','Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IlFVVXdPVFpDUTBVM01qZEVRME0wTkRFelJrUkJORFk0T0RZeE1FRTBSa1pFUlVWRVF6bERNZyJ9.eyJodHRwczovL2NhbXVuZGEuY29tL2NsdXN0ZXJJZCI6IjQxZTRhMjZlLWI5ZTItNGIxYS05OWE5LWU2NWYxZjA5ZWZkOSIsImh0dHBzOi8vY2FtdW5kYS5jb20vb3JnSWQiOiJhNzQyNjg5Zi0xNGI5LTQxOGYtYjhkYS00OWViZTQxNjUxZWMiLCJodHRwczovL2NhbXVuZGEuY29tL2NsaWVudElkIjoiTm9nZWpEQnlYbWVLc3FfZnlWbjlFRmtTVHllSnh3cEMiLCJpc3MiOiJodHRwczovL3dlYmxvZ2luLmNsb3VkLmNhbXVuZGEuaW8vIiwic3ViIjoibXdvOTB0MnIzMTYwN3ozNkJOSDY5dFdGS0JYNTVqMVdAY2xpZW50cyIsImF1ZCI6InplZWJlLmNhbXVuZGEuaW8iLCJpYXQiOjE3MzI3MTczNDcsImV4cCI6MTczMjgwMzc0Nywic2NvcGUiOiI0MWU0YTI2ZS1iOWUyLTRiMWEtOTlhOS1lNjVmMWYwOWVmZDkiLCJndHkiOiJjbGllbnQtY3JlZGVudGlhbHMiLCJhenAiOiJtd285MHQycjMxNjA3ejM2Qk5INjl0V0ZLQlg1NWoxVyJ9.gsRRSv2_sRF_h5pXXPFhh-o8xklibLlx7C9Ys93pab4rx3uLWlsR_QqZuR0DTZkNHpjGxANpGtdSaEVmQO9nvaFU2V7hWL2zEfyZKZqTbnsBIFa9ToYPu0wCgJT22eRihpIuwHHwg0jR2cIpI0kH9opETNxwpb6iYCQ7qLVA7N255qS1Kokz4MVF0C1dxUlnneRl34G6yga1DLpJOtKQngsAENJLutKWyDp9Bl6SKoHWHroWZmvWzdbSrZFJRLOIAMZ-23OI0nx3QAaaHQRJqCJxVUTDOWZVIoMfXwGdXVpq9a90Ffm4z1FHezo0RbRyNrokbr_2N3LHPXJHogNzJw'",
+	method = 'POST',
+	@map(type = 'json',  
+		@payload("""
+			        {
+			        "name": "{{name}}",
+					"correlationKey": "{{correlationKey}}",
+					"variables":{
+ 						        "itemId":"{{itemId}}",
+ 			                    "itemName":"{{itemName}}",
+ 			                    "quantity":{{quantity}},
+ 			                    "expiryDate":"{{expiryDate}}"
+ 			                    }
+			        }
+			         """)
+		),
+		ssl.verification.disabled='true'
+		)
+@sink(type='log')
+define stream LowInventoryStream(itemId string, itemName string, quantity int, expiryDate string,name string, correlationKey string);
+
+
+@sink(type = 'http', 
+	publisher.url = 'https://lhr-1.zeebe.camunda.io/41e4a26e-b9e2-4b1a-99a9-e65f1f09efd9/v2/messages/correlation',
+	headers = "'Content-Type: application/json','Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IlFVVXdPVFpDUTBVM01qZEVRME0wTkRFelJrUkJORFk0T0RZeE1FRTBSa1pFUlVWRVF6bERNZyJ9.eyJodHRwczovL2NhbXVuZGEuY29tL2NsdXN0ZXJJZCI6IjQxZTRhMjZlLWI5ZTItNGIxYS05OWE5LWU2NWYxZjA5ZWZkOSIsImh0dHBzOi8vY2FtdW5kYS5jb20vb3JnSWQiOiJhNzQyNjg5Zi0xNGI5LTQxOGYtYjhkYS00OWViZTQxNjUxZWMiLCJodHRwczovL2NhbXVuZGEuY29tL2NsaWVudElkIjoiTm9nZWpEQnlYbWVLc3FfZnlWbjlFRmtTVHllSnh3cEMiLCJpc3MiOiJodHRwczovL3dlYmxvZ2luLmNsb3VkLmNhbXVuZGEuaW8vIiwic3ViIjoibXdvOTB0MnIzMTYwN3ozNkJOSDY5dFdGS0JYNTVqMVdAY2xpZW50cyIsImF1ZCI6InplZWJlLmNhbXVuZGEuaW8iLCJpYXQiOjE3MzI3MTczNDcsImV4cCI6MTczMjgwMzc0Nywic2NvcGUiOiI0MWU0YTI2ZS1iOWUyLTRiMWEtOTlhOS1lNjVmMWYwOWVmZDkiLCJndHkiOiJjbGllbnQtY3JlZGVudGlhbHMiLCJhenAiOiJtd285MHQycjMxNjA3ejM2Qk5INjl0V0ZLQlg1NWoxVyJ9.gsRRSv2_sRF_h5pXXPFhh-o8xklibLlx7C9Ys93pab4rx3uLWlsR_QqZuR0DTZkNHpjGxANpGtdSaEVmQO9nvaFU2V7hWL2zEfyZKZqTbnsBIFa9ToYPu0wCgJT22eRihpIuwHHwg0jR2cIpI0kH9opETNxwpb6iYCQ7qLVA7N255qS1Kokz4MVF0C1dxUlnneRl34G6yga1DLpJOtKQngsAENJLutKWyDp9Bl6SKoHWHroWZmvWzdbSrZFJRLOIAMZ-23OI0nx3QAaaHQRJqCJxVUTDOWZVIoMfXwGdXVpq9a90Ffm4z1FHezo0RbRyNrokbr_2N3LHPXJHogNzJw'",
+	method = 'POST',
+	@map(type = 'json', 
+		@payload("""
+			        {
+			        "name": "{{name}}",
+					"correlationKey": "{{correlationKey}}",
+					"variables":{
+ 						        "itemId":"{{itemId}}",
+ 			                    "itemName":"{{itemName}}",
+ 			                    "quantity":{{quantity}},
+ 			                    "expiryDate":"{{expiryDate}}"
+ 			                    }
+			        }
+			         """) 
+		),
+		ssl.verification.disabled='true'
+		)
+@sink(type='log')
+define stream ExpiredStream(itemId string, itemName string, quantity int, expiryDate string, name string, correlationKey string);
+
+@sink(type = 'http', 
+	publisher.url = 'https://lhr-1.zeebe.camunda.io/41e4a26e-b9e2-4b1a-99a9-e65f1f09efd9/v2/messages/correlation',
+	headers = "'Content-Type: application/json','Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IlFVVXdPVFpDUTBVM01qZEVRME0wTkRFelJrUkJORFk0T0RZeE1FRTBSa1pFUlVWRVF6bERNZyJ9.eyJodHRwczovL2NhbXVuZGEuY29tL2NsdXN0ZXJJZCI6IjQxZTRhMjZlLWI5ZTItNGIxYS05OWE5LWU2NWYxZjA5ZWZkOSIsImh0dHBzOi8vY2FtdW5kYS5jb20vb3JnSWQiOiJhNzQyNjg5Zi0xNGI5LTQxOGYtYjhkYS00OWViZTQxNjUxZWMiLCJodHRwczovL2NhbXVuZGEuY29tL2NsaWVudElkIjoiTm9nZWpEQnlYbWVLc3FfZnlWbjlFRmtTVHllSnh3cEMiLCJpc3MiOiJodHRwczovL3dlYmxvZ2luLmNsb3VkLmNhbXVuZGEuaW8vIiwic3ViIjoibXdvOTB0MnIzMTYwN3ozNkJOSDY5dFdGS0JYNTVqMVdAY2xpZW50cyIsImF1ZCI6InplZWJlLmNhbXVuZGEuaW8iLCJpYXQiOjE3MzI3MTczNDcsImV4cCI6MTczMjgwMzc0Nywic2NvcGUiOiI0MWU0YTI2ZS1iOWUyLTRiMWEtOTlhOS1lNjVmMWYwOWVmZDkiLCJndHkiOiJjbGllbnQtY3JlZGVudGlhbHMiLCJhenAiOiJtd285MHQycjMxNjA3ejM2Qk5INjl0V0ZLQlg1NWoxVyJ9.gsRRSv2_sRF_h5pXXPFhh-o8xklibLlx7C9Ys93pab4rx3uLWlsR_QqZuR0DTZkNHpjGxANpGtdSaEVmQO9nvaFU2V7hWL2zEfyZKZqTbnsBIFa9ToYPu0wCgJT22eRihpIuwHHwg0jR2cIpI0kH9opETNxwpb6iYCQ7qLVA7N255qS1Kokz4MVF0C1dxUlnneRl34G6yga1DLpJOtKQngsAENJLutKWyDp9Bl6SKoHWHroWZmvWzdbSrZFJRLOIAMZ-23OI0nx3QAaaHQRJqCJxVUTDOWZVIoMfXwGdXVpq9a90Ffm4z1FHezo0RbRyNrokbr_2N3LHPXJHogNzJw'",
+	method = 'POST',
+	@map(type = 'json', 
+		@payload("""
+			        {
+			        "name": "{{name}}",
+					"correlationKey": "{{correlationKey}}",
+					"variables":{
+ 						        "itemId":"{{itemId}}",
+ 			                    "itemName":"{{itemName}}",
+ 			                    "quantity":{{quantity}},
+ 			                    "expiryDate":"{{expiryDate}}"
+ 			                    }
+			        }
+			         """) 
+		),
+		ssl.verification.disabled='true'
+		)
+@sink(type='log')
+define stream NearExpiryStream(itemId string, itemName string, quantity int, expiryDate string, name string, correlationKey string);
+ 
+
+@info(name = 'LowInventory')
+from InventoryStream[quantity < 30]#window.delay(5 sec)
+select itemId, itemName, quantity, expiryDate,'Receive Purchase Event' as name, processId as correlationKey
+insert into LowInventoryStream;
+
+@info(name = 'NearExpiry')
+from InventoryStream[time:timestampInMilliseconds(expiryDate, 'yyyy-MM-dd') >= currentTimeMillis() and 
+                      time:timestampInMilliseconds(expiryDate, 'yyyy-MM-dd') <= (currentTimeMillis() + 5 * 24 * 60 * 60 * 1000)]#window.delay(10 sec)
+select itemId, itemName, quantity, expiryDate, 'Receive Discount Event' as name, processId as correlationKey
+insert into NearExpiryStream;
+
+@info(name = 'Expired')
+from InventoryStream[time:timestampInMilliseconds(expiryDate, 'yyyy-MM-dd') < currentTimeMillis()]#window.delay(10 sec)
+select itemId, itemName, quantity, expiryDate , 'Receive Discard Event' as name, processId as correlationKey
+insert into ExpiredStream;
+
+@info(name = 'predictedDemand')
+from SalesStream#window.time(30 days) 
+select itemId, itemName, avg(sales) as predictedDemand 
+	group by itemId 
+insert into PredictedDemandStream;
+
+@info(name = 'PredictedDemandStream')
+from InventoryStream as s 
+join PredictedDemandStream as p 
+	on s.itemId == p.itemId 
+select s.itemId as itemId, s.itemName as itemName, s.quantity as quantity, p.predictedDemand * 1.5 as excessThreshold, p.predictedDemand as predictedDemand 
+insert into StockWithPredictedDemandStream;
+
+@info(name = 'ExcessInventory')
+from StockWithPredictedDemandStream[quantity > excessThreshold] 
+select itemId, itemName, quantity, predictedDemand 
+insert into ExcessInventoryByDemandStream;
+
+@info(name = 'query10')
+from ExcessInventoryByDemandStream 
+select itemId, itemName, quantity 
+insert into CamundaExcessPromoteOrDonateStream;
+
+
+
